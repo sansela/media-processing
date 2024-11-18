@@ -2,7 +2,7 @@ const config = {
     templates: {
         multi_slide_text_template: {
             backgroundImage: 'templates/background.jpg',
-            outputPath: 'public/output.jpg',
+            outputFolder: 'public/',
             mainSlide: {
                 fontSize: 100,
                 fontFamily: 'Arial',
@@ -11,24 +11,39 @@ const config = {
                 fontStyle: 'normal',
                 paddingLeft: 80,
                 paddingRight: 40,
-                lineSpacing: 50
+                lineSpacing: 50,
             },
             subSlide: {
-                fontSize: 24,
+                fontSize: 50,
                 fontFamily: 'Arial',
-                color: 'black',
-                fontWeight: 'bold',
+                color: 'gray',
+                fontWeight: 700,
+                fontStyle: 'italic',
+                paddingLeft: 50,
+                paddingRight: 50,
+                lineSpacing: 40,
+            },
+            thanksSlide: {
+                fontSize: 40,
+                fontFamily: 'Courier New',
+                color: 'darkblue',
+                fontWeight: 500,
                 fontStyle: 'normal',
                 paddingLeft: 50,
                 paddingRight: 50,
-                lineSpacing: 10,
+                lineSpacing: 30,
             },
-            thanksSlide: {},
-            promotionSlide: {}
+            promotionSlide: {
+                fontSize: 60,
+                fontFamily: 'Verdana',
+                color: 'green',
+                fontWeight: 600,
+                fontStyle: 'normal',
+                paddingLeft: 50,
+                paddingRight: 50,
+                lineSpacing: 40,
+            },
         },
-        multi_slide_image_template: {},
-        single_slide_text_template: {},
-        single_slide_video_template: {}
     },
 };
 

@@ -25,65 +25,55 @@ function wrapText(text, maxWidth, fontSize) {
     return lines;
 }
 
-async function addTextOverlay(config, templateName) {
+async function generateSlides(config, quotesList) {
+    let slideNumber = 1; // Track the slide sequence
+
+    for (let i = 0; i < quotesList.length; i++) {
+        const template = i === 0 ? config.templates.multi_slide_text_template.mainSlide : config.templates.multi_slide_text_template.subSlide;
+
+        const outputFileName = `public/${slideNumber}-${i === 0 ? 'hero' : 'sub'}.png`;
+        await generateSlide(config.templates.multi_slide_text_template, template, quotesList[i], outputFileName, i > 0 ? `${slideNumber}. ` : '');
+        slideNumber++;
+    }
+
+    // Generate Thanks Slide
+    const thanksList = quotesList.slice(0, 3); // Example subset for the thanks slide
+    await generateSlide(config.templates.multi_slide_text_template, config.templates.multi_slide_text_template.thanksSlide, thanksList.join('\n\n'), `public/${slideNumber}-thanks.png`);
+    slideNumber++;
+
+    // Generate Promotion Slide
+    const promotionList = quotesList.slice(3, 5); // Example subset for the promotion slide
+    await generateSlide(config.templates.multi_slide_text_template, config.templates.multi_slide_text_template.promotionSlide, promotionList.join('\n\n'), `public/${slideNumber}-promotion.png`);
+}
+
+async function generateSlide(templateConfig, slideConfig, textContent, outputFile, prefix = '') {
     try {
-        console.log(templateName);
-        const image = sharp(config.templates[templateName].backgroundImage);
+        const image = sharp(templateConfig.backgroundImage);
         const metadata = await image.metadata();
+        const maxWidth = metadata.width - slideConfig.paddingLeft - slideConfig.paddingRight;
 
-        const template = config.templates[templateName]; //multi_slide_text_template
-        const mainSlide = template.mainSlide;
+        // Wrap text and calculate starting Y position
+        const lines = wrapText(textContent, maxWidth, slideConfig.fontSize);
+        const totalTextHeight = lines.length * slideConfig.fontSize + (lines.length - 1) * slideConfig.lineSpacing;
+        let currentY = (metadata.height - totalTextHeight) / 2;
 
-        const maxWidthMainSlide = maxWidth(metadata, mainSlide);
-
-        function maxWidth(metadata, slide) {
-            return metadata.width - slide.paddingLeft - slide.paddingRight;
-        }
-
-        // Sample input list
-        // const listItems = [
-        //     'Protect who is behind you, and respect who is beside you.Protect who is behind you, and respect who is beside you.',
-        //     'Never eat the last piece of something you didn\'t buy.',
-        //     'By age 25, you should be smart enough to realize this.',
-        // ];
-
-        const listItems = ['By age 25, you should be smart enough to realize this.'];
-
-        // Calculate total text height for vertical centering
-        function totalHeight(itemsList, maxWidth, slide) {
-            const lineHeights = itemsList.map(item => wrapText(item, maxWidth, slide.fontSize).length);
-            const totalTextHeight = lineHeights.reduce((total, lines) => total + lines * slide.fontSize + slide.lineSpacing, 0);
-            const startingY = (metadata.height - totalTextHeight) / 2;
-            return startingY;
-        }
-
-        // Generate SVG
-        let currentY = totalHeight(listItems, maxWidthMainSlide, mainSlide);
-        const svgText = listItems.map(item => {
-            const lines = wrapText(item, maxWidthMainSlide, mainSlide.fontSize);
-
-            const lineSVG = lines.map(line => {
-                const svg = `
+        // Create SVG text
+        const svgText = lines.map((line, idx) => {
+            const boldPrefix = idx === 0 && prefix ? `<tspan font-weight="bold">${prefix}</tspan>` : '';
+            const lineSvg = `
                 <text 
-                    x="${mainSlide.paddingLeft}" 
+                    x="${slideConfig.paddingLeft}" 
                     y="${currentY}" 
-                    font-family="${mainSlide.fontFamily}" 
-                    font-size="${mainSlide.fontSize}px" 
-                    font-weight="${mainSlide.fontWeight}" 
-                    font-style="${mainSlide.fontStyle}" 
-                    fill="${mainSlide.color}" 
-                    dominant-baseline="hanging"
-                >
-                    ${line}
+                    font-family="${slideConfig.fontFamily}" 
+                    font-size="${slideConfig.fontSize}px" 
+                    font-weight="${slideConfig.fontWeight}" 
+                    font-style="${slideConfig.fontStyle}" 
+                    fill="${slideConfig.color}" 
+                    dominant-baseline="hanging">
+                    ${boldPrefix}${line}
                 </text>`;
-                currentY += mainSlide.fontSize + mainSlide.lineSpacing;
-                return svg;
-            }).join('');
-
-            // Add a gap between list items
-            currentY += mainSlide.fontSize;
-
-            return lineSVG;
+            currentY += slideConfig.fontSize + slideConfig.lineSpacing;
+            return lineSvg;
         }).join('');
 
         const svgImage = `
@@ -92,16 +82,22 @@ async function addTextOverlay(config, templateName) {
             </svg>
         `;
 
-        // Composite SVG onto the image
-        await image
-            .composite([{ input: Buffer.from(svgImage), top: 0, left: 0 }])
-            .toFile(template.outputPath);
+        // Composite the SVG text onto the image
+        await image.composite([{ input: Buffer.from(svgImage), top: 0, left: 0 }]).toFile(outputFile);
 
-        console.log('Text overlay added successfully!');
+        console.log(`Slide generated: ${outputFile}`);
     } catch (error) {
-        console.error('Error adding text overlay:', error);
+        console.error(`Error generating slide for ${outputFile}:`, error);
     }
 }
 
-// Call the function with the configuration
-addTextOverlay(config, 'multi_slide_text_template');
+// Call the function with the configuration and quotes list
+const quotesList = [
+    "The only way to do great work is to love what you do. - Steve Jobs",
+    "Life is what happens when you're busy making other plans. - John Lennon",
+    "The purpose of our lives is to be happy. - Dalai Lama",
+    "Get busy living or get busy dying. - Stephen King",
+    "You have within you right now, everything you need to deal with whatever the world can throw at you. - Brian Tracy"
+];
+
+generateSlides(config, quotesList);
