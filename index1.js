@@ -63,13 +63,14 @@ async function generateSlide(templateConfig, slideConfig, textContent, outputFil
         const maxWidth = metadata.width - slideConfig.paddingLeft - slideConfig.paddingRight;
 
         // Split the content into paragraphs
-        const paragraphs = textContent.split('\n\n');
+        const paragraphs = textContent.split("\n\n");
 
         // Wrap each paragraph and calculate the total height
         let totalTextHeight = 0;
-        const wrappedParagraphs = paragraphs.map(paragraph => {
+        const wrappedParagraphs = paragraphs.map((paragraph) => {
             const lines = wrapText(paragraph, maxWidth, slideConfig.fontSize);
-            totalTextHeight += lines.length * slideConfig.fontSize +
+            totalTextHeight +=
+                lines.length * slideConfig.fontSize +
                 (lines.length - 1) * slideConfig.lineSpacing;
             return lines;
         });
@@ -89,10 +90,11 @@ async function generateSlide(templateConfig, slideConfig, textContent, outputFil
                             x="${slideConfig.paddingLeft}" 
                             y="${currentY}" 
                             font-family="${slideConfig.fontFamily}" 
-                            font-size="${slideConfig.fontSize}" 
+                            font-size="${slideConfig.fontSize}px" 
                             font-weight="${slideConfig.fontWeight}" 
                             font-style="${slideConfig.fontStyle}" 
-                            fill="${slideConfig.color}"
+                            fill="${slideConfig.color}" 
+                            dominant-baseline="hanging"
                         >${line}</text>`;
                         currentY += slideConfig.fontSize + slideConfig.lineSpacing;
                         return lineSvg;
@@ -101,7 +103,7 @@ async function generateSlide(templateConfig, slideConfig, textContent, outputFil
 
                 // Add extra space after each paragraph except the last one
                 if (pIndex < wrappedParagraphs.length - 1) {
-                    currentY += (slideConfig.paragraphSpacing || slideConfig.lineSpacing) - slideConfig.lineSpacing;
+                    currentY += slideConfig.paragraphSpacing || slideConfig.lineSpacing;
                 }
 
                 return paragraphSvg;
