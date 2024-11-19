@@ -15,7 +15,7 @@ const config = {
             },
             subSlide: {
                 fontSize: 40,
-                fontFamily: 'Verdana',
+                fontFamily: 'Courier New',
                 color: 'black',
                 fontWeight: 500,
                 fontStyle: 'normal',
