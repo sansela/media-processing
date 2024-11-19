@@ -3,6 +3,16 @@ const config = {
         multi_slide_text_template: {
             backgroundImage: 'templates/background.jpg',
             outputFolder: 'public/',
+            commonText: {
+                text: "The only way to do great work is to love what you do", // From mainSlide
+                fontSize: 28,
+                fontFamily: 'Arial',
+                color: 'black',
+                fontWeight: 300,
+                fontStyle: 'normal',
+                paddingTop: 30,
+                paddingRight: 50,
+            },
             mainSlide: {
                 fontSize: 100,
                 fontFamily: 'Arial',

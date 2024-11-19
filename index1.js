@@ -62,6 +62,22 @@ async function generateSlide(templateConfig, slideConfig, textContent, outputFil
         const metadata = await image.metadata();
         const maxWidth = metadata.width - slideConfig.paddingLeft - slideConfig.paddingRight;
 
+        // Add common text on top-right
+        const commonTextConfig = templateConfig.commonText;
+        const commonTextSvg = `
+            <text 
+                x="${metadata.width - commonTextConfig.paddingRight}" 
+                y="${commonTextConfig.paddingTop}" 
+                font-family="${commonTextConfig.fontFamily}" 
+                font-size="${commonTextConfig.fontSize}px" 
+                font-weight="${commonTextConfig.fontWeight}" 
+                font-style="${commonTextConfig.fontStyle}" 
+                fill="${commonTextConfig.color}" 
+                text-anchor="end"
+                dominant-baseline="hanging"
+            >${slidesList.mainSlide[0]} | </text>
+        `;
+
         // Split the content into paragraphs
         const paragraphs = textContent.split("\n\n");
 
@@ -112,6 +128,7 @@ async function generateSlide(templateConfig, slideConfig, textContent, outputFil
 
         const svgImage = `
             <svg width="${metadata.width}" height="${metadata.height}" xmlns="http://www.w3.org/2000/svg">
+                ${commonTextSvg}
                 ${svgText}
             </svg>
         `;
