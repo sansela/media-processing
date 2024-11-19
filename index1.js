@@ -1,38 +1,22 @@
 const sharp = require('sharp');
 const config = require('./config1');
-
-function wrapText(text, maxWidth, fontSize) {
-    const words = text.split(' ');
-    const lines = [];
-    let currentLine = '';
-
-    words.forEach(word => {
-        const testLine = currentLine ? `${currentLine} ${word}` : word;
-        const testWidth = testLine.length * (fontSize * 0.6); // Approximate width
-
-        if (testWidth > maxWidth && currentLine) {
-            lines.push(currentLine);
-            currentLine = word;
-        } else {
-            currentLine = testLine;
-        }
-    });
-
-    if (currentLine) {
-        lines.push(currentLine);
-    }
-
-    return lines;
-}
+const { wrapText, calculateTotalHeight } = require('./textHelper');
 
 async function generateSlides(config, quotesList) {
     let slideNumber = 1; // Track the slide sequence
 
-    for (let i = 0; i < quotesList.length; i++) {
-        const template = i === 0 ? config.templates.multi_slide_text_template.mainSlide : config.templates.multi_slide_text_template.subSlide;
+    // First slide (hero slide)
+    const template = config.templates.multi_slide_text_template.mainSlide;
+    const outputFileName = `public/${slideNumber}-hero.png`;
+    await generateSlide(config.templates.multi_slide_text_template, template, quotesList[0], outputFileName, ''); // Hero slide
+    slideNumber++;
 
-        const outputFileName = `public/${slideNumber}-${i === 0 ? 'hero' : 'sub'}.png`;
-        await generateSlide(config.templates.multi_slide_text_template, template, quotesList[i], outputFileName, i > 0 ? `${slideNumber}. ` : '');
+    // Sub slides (two list items per slide)
+    for (let i = 1; i < quotesList.length; i += 2) {
+        const template = config.templates.multi_slide_text_template.subSlide;
+        const quotePair = quotesList.slice(i, i + 2).join('\n\n'); // Combine two quotes into one slide
+        const outputFileName = `public/${slideNumber}-sub.png`;
+        await generateSlide(config.templates.multi_slide_text_template, template, quotePair, outputFileName, `${slideNumber}. `);
         slideNumber++;
     }
 
@@ -101,3 +85,4 @@ const quotesList = [
 ];
 
 generateSlides(config, quotesList);
+
